@@ -163,6 +163,49 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    private var choseExportFileLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
+        if(it.resultCode != RESULT_OK){
+            return@registerForActivityResult
+        }
+        // val exportText = "{ a:1 }" // myStringifiedJsonData
+        val exportText = actionToJsonString(menuActionRoot, true)
+        val outputStream = it.data?.data?.let { it1 -> contentResolver.openOutputStream(it1) }
+
+        if (exportText == null || outputStream == null) {
+            // Toast.makeText(this, "written to %s".format(exportFile), Toast.LENGTH_LONG).show()
+            return@registerForActivityResult
+        }
+
+        try {
+            outputStream.write(exportText.toByteArray())
+            outputStream.close()
+            // Toast.makeText(this, "written to %s".format(exportFile), Toast.LENGTH_LONG).show()
+        } catch (e: Exception) {
+            // Toast.makeText(this, "written to %s".format(exportFile), Toast.LENGTH_LONG).show()
+            e.printStackTrace()
+        }
+        /*
+                val stream = it.data?.data?.let { it1 -> contentResolver.openInputStream(it1) }
+
+                stream?.let {
+                    val fileData = ByteArray(stream.available())
+                    stream.read(fileData)
+                    stream.close()
+
+                    val deserializer = GsonBuilder()
+                        .registerTypeAdapter(MenuAction::class.java, MenuActionDeserializer())
+                        .create()
+
+                    val fileString = String(fileData)
+
+                    menuActionRoot = deserializer.fromJson(fileString, MenuAction::class.java)
+                    sharedPrefs.edit().putString(PrefConstants.PREFS_KEY_MENU_STRUCTURE, fileString).apply()
+                    refreshTree()
+
+         */
+   }
+
+
     private fun handleTreeClick(treeNode: TreeNode, menuAction: Any): Boolean{
         if(menuAction !is MenuAction){
             return false
@@ -307,13 +350,24 @@ class MainActivity : AppCompatActivity() {
         choseImportFileLauncher.launch(intent)
     }
 
-    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+    private fun myExportStructure(){
+        val intent = Intent(Intent.ACTION_CREATE_DOCUMENT).apply {
+            val exportFileName = File("%d.json".format(System.currentTimeMillis()))
+            addCategory(Intent.CATEGORY_OPENABLE)
+            type = "application/json"
+            intent.putExtra(Intent.EXTRA_TITLE, exportFileName)
+
+        }
+        choseExportFileLauncher.launch(intent)
+    }
+
+override fun onOptionsItemSelected(item: MenuItem): Boolean {
         // Handle action bar item clicks here. The action bar will
         // automatically handle clicks on the Home/Up button, so long
         // as you specify a parent activity in AndroidManifest.xml.
         return when (item.itemId) {
             R.id.action_export -> {
-                exportStructure(menuActionRoot)
+                myExportStructure(/*menuActionRoot*/)
                 true
             }
             R.id.action_import -> {
