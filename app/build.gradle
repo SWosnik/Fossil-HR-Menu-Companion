@@ -9,7 +9,7 @@ android {
     defaultConfig {
         applicationId "d.d.hrmenucompanion"
         minSdk 21
-        targetSdk 30
+        targetSdk 29
         versionCode 1
         versionName "1.3.0"
 
@@ -32,6 +32,7 @@ android {
     buildFeatures {
         viewBinding true
     }
+    namespace 'd.d.hrmenucompanion'
 }
 
 dependencies {
